@@ -65,6 +65,40 @@ class Store extends EventEmitter {
     }
   }
 
+  // Auth methods
+  createAccount(userData) {
+    localStorage.setItem('studyastra_users', JSON.stringify([
+      ...(JSON.parse(localStorage.getItem('studyastra_users') || '[]')),
+      userData
+    ]));
+    this.data.user = userData;
+    this.saveData();
+    this.emit('userUpdated', this.data.user);
+    return userData;
+  }
+
+  login(email, password) {
+    const users = JSON.parse(localStorage.getItem('studyastra_users') || '[]');
+    const user = users.find(u => u.email === email && u.password === password);
+    if (user) {
+      this.data.user = user;
+      this.saveData();
+      this.emit('userUpdated', this.data.user);
+      return true;
+    }
+    return false;
+  }
+
+  logout() {
+    this.data.user = null;
+    this.saveData();
+    this.emit('userUpdated', null);
+  }
+
+  isAuthenticated() {
+    return !!this.data.user;
+  }
+
   // User methods
   getUser() {
     return this.data.user;
@@ -72,6 +106,13 @@ class Store extends EventEmitter {
 
   updateUser(updates) {
     this.data.user = { ...this.data.user, ...updates };
+    // Update in users list too
+    const users = JSON.parse(localStorage.getItem('studyastra_users') || '[]');
+    const index = users.findIndex(u => u.id === this.data.user.id);
+    if (index !== -1) {
+      users[index] = this.data.user;
+      localStorage.setItem('studyastra_users', JSON.stringify(users));
+    }
     this.saveData();
     this.emit('userUpdated', this.data.user);
   }

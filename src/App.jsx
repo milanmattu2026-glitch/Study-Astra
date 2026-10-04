@@ -23,6 +23,7 @@ import Profile from './pages/Profile';
 import Onboarding from './pages/Onboarding';
 import WeakTopics from './pages/WeakTopics';
 import QuizTake from './pages/QuizTake';
+import Login from './pages/Login';
 
 function App() {
   const location = useLocation();
@@ -62,12 +63,29 @@ function App() {
     }
   }, [searchQuery]);
 
-  // Check onboarding
+  // Check onboarding and auth
   useEffect(() => {
-    if (user && !user.onboardingCompleted && location.pathname !== '/onboarding') {
+    // Basic Auth Check
+    if (!user && location.pathname !== '/login') {
+      navigate('/login');
+      return;
+    }
+
+    if (user && !user.onboardingCompleted && location.pathname !== '/onboarding' && location.pathname !== '/login') {
       navigate('/onboarding');
     }
   }, [user, location.pathname, navigate]);
+
+  if (!user && location.pathname === '/login') {
+    return (
+      <div className="min-h-screen bg-[var(--color-bg-primary)] text-[var(--color-text-primary)]">
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="*" element={<Login />} />
+        </Routes>
+      </div>
+    );
+  }
 
   const navItems = [
     { path: '/', icon: Home, label: 'Dashboard' },

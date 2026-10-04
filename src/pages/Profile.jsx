@@ -1,14 +1,32 @@
+import { useState } from 'react';
 import { useStore } from '../hooks/useStore';
-import { User, Mail, Calendar, Award, TrendingUp, Target, Flame, Edit2 } from 'lucide-react';
+import { User, Mail, Calendar, Award, TrendingUp, Target, Edit2, LogOut, Check, X } from 'lucide-react';
 import { formatDate } from '../utils/helpers';
+import { store } from '../store';
+import { useNavigate } from 'react-router-dom';
 
 export default function Profile() {
+  const navigate = useNavigate();
   const user = useStore('user');
   const subjects = useStore('subjects');
   const tasks = useStore('tasks');
   const sessions = useStore('sessions');
   const quizzes = useStore('quizzes');
   const streakData = useStore('streak');
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({
+    name: user?.name || '',
+    email: user?.email || '',
+    educationLevel: user?.educationLevel || '',
+    dailyStudyGoal: user?.dailyStudyGoal || 240,
+    avatar: user?.avatar || '👨‍🎓'
+  });
+
+  const handleSaveProfile = () => {
+    store.updateUser(editForm);
+    setIsEditing(false);
+  };
 
   const completedTasks = tasks.filter(t => t.completed).length;
   const totalStudyMinutes = sessions.reduce((sum, s) => sum + (s.duration || 0), 0);
@@ -23,38 +41,107 @@ export default function Profile() {
   return (
     <div className="page-enter space-y-6 max-w-4xl mx-auto">
       {/* Profile Header */}
-      <div className="card">
+      <div className="card text-left">
         <div className="flex flex-col md:flex-row items-center gap-6">
           <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[var(--color-accent)] to-purple-600 flex items-center justify-center text-4xl">
-            {user?.avatar || '👨‍🎓'}
+            {isEditing ? (
+              <input
+                type="text"
+                className="w-16 bg-transparent text-center focus:outline-none"
+                value={editForm.avatar}
+                onChange={(e) => setEditForm({...editForm, avatar: e.target.value})}
+              />
+            ) : (
+              user?.avatar || '👨‍🎓'
+            )}
           </div>
 
-          <div className="flex-1 text-center md:text-left">
-            <h1 className="text-3xl font-bold mb-2">{user?.name || 'Student'}</h1>
-            <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-sm text-[var(--color-text-muted)]">
-              {user?.email && (
-                <span className="flex items-center gap-1">
-                  <Mail size={16} />
-                  {user.email}
-                </span>
-              )}
-              {user?.educationLevel && (
-                <span className="flex items-center gap-1">
-                  <User size={16} />
-                  {user.educationLevel}
-                </span>
-              )}
-              <span className="flex items-center gap-1">
-                <Calendar size={16} />
-                Member since {formatDate(user?.createdAt || new Date())}
-              </span>
-            </div>
+          <div className="flex-1 text-center md:text-left w-full">
+            {isEditing ? (
+              <div className="space-y-3 mb-4">
+                <input
+                  type="text"
+                  className="input font-bold text-xl"
+                  value={editForm.name}
+                  onChange={(e) => setEditForm({...editForm, name: e.target.value})}
+                />
+                <input
+                  type="email"
+                  className="input"
+                  value={editForm.email}
+                  disabled
+                />
+                <input
+                  type="text"
+                  className="input"
+                  placeholder="Education Level"
+                  value={editForm.educationLevel}
+                  onChange={(e) => setEditForm({...editForm, educationLevel: e.target.value})}
+                />
+                <div className="flex items-center gap-2">
+                  <label className="text-sm">Daily Goal (mins):</label>
+                  <input
+                    type="number"
+                    className="input w-32"
+                    value={editForm.dailyStudyGoal}
+                    onChange={(e) => setEditForm({...editForm, dailyStudyGoal: parseInt(e.target.value)})}
+                  />
+                </div>
+              </div>
+            ) : (
+              <>
+                <h1 className="text-3xl font-bold mb-2">{user?.name || 'Student'}</h1>
+                <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-sm text-[var(--color-text-muted)]">
+                  {user?.email && (
+                    <span className="flex items-center gap-1">
+                      <Mail size={16} />
+                      {user.email}
+                    </span>
+                  )}
+                  {user?.educationLevel && (
+                    <span className="flex items-center gap-1">
+                      <User size={16} />
+                      {user.educationLevel}
+                    </span>
+                  )}
+                  <span className="flex items-center gap-1">
+                    <Calendar size={16} />
+                    Member since {formatDate(user?.createdAt || new Date())}
+                  </span>
+                </div>
+              </>
+            )}
           </div>
 
-          <button className="btn btn-secondary">
-            <Edit2 size={16} />
-            Edit Profile
-          </button>
+          <div className="flex flex-col gap-2">
+            {isEditing ? (
+              <>
+                <button onClick={handleSaveProfile} className="btn btn-primary">
+                  <Check size={16} /> Save
+                </button>
+                <button onClick={() => setIsEditing(false)} className="btn btn-secondary text-[var(--color-text-muted)] hover:text-white">
+                  <X size={16} /> Cancel
+                </button>
+              </>
+            ) : (
+              <>
+                <button onClick={() => setIsEditing(true)} className="btn btn-secondary">
+                  <Edit2 size={16} />
+                  Edit Profile
+                </button>
+                <button
+                  onClick={() => {
+                    store.logout();
+                    navigate('/login');
+                  }}
+                  className="btn btn-danger"
+                >
+                  <LogOut size={16} />
+                  Logout
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </div>
 

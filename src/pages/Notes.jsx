@@ -1,15 +1,17 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Plus, Trash2, Edit2, Star, StarOff, Search, Tag, FileText, BookOpen, X } from 'lucide-react';
+import { Plus, Trash2, Edit2, Star, StarOff, Search, Tag, FileText, BookOpen, X, Download, Youtube } from 'lucide-react';
 import { useStore } from '../hooks/useStore';
 import { store } from '../store';
-import { formatDate, getRelativeTime } from '../utils/helpers';
+import { formatDate, getRelativeTime, getYouTubeId } from '../utils/helpers';
+import html2pdf from 'html2pdf.js';
 
 export default function Notes() {
   const { id } = useParams();
   const navigate = useNavigate();
   const notes = useStore('notes');
   const subjects = useStore('subjects');
+  const pdfRef = useRef(null);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filterSubject, setFilterSubject] = useState('all');
@@ -18,6 +20,7 @@ export default function Notes() {
   const [currentNote, setCurrentNote] = useState({
     title: '',
     content: '',
+    youtubeUrl: '',
     subject: '',
     chapter: '',
     topic: '',
@@ -72,12 +75,25 @@ export default function Notes() {
     setCurrentNote({
       title: '',
       content: '',
+      youtubeUrl: '',
       subject: '',
       chapter: '',
       topic: '',
       tags: [],
       favorite: false
     });
+  };
+
+  const handleExportToPDF = () => {
+    const element = pdfRef.current;
+    const opt = {
+      margin: 1,
+      filename: `${selectedNote.title}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+    html2pdf().set(opt).from(element).save();
   };
 
   const addTag = () => {
@@ -147,6 +163,13 @@ export default function Notes() {
 
           <div className="flex gap-2">
             <button
+              onClick={handleExportToPDF}
+              className="btn btn-secondary text-blue-500 hover:bg-blue-500/10"
+              title="Download as PDF"
+            >
+              <Download size={16} />
+            </button>
+            <button
               onClick={() => store.toggleNoteFavorite(selectedNote.id)}
               className="btn btn-secondary"
             >
@@ -187,17 +210,39 @@ export default function Notes() {
           </div>
         )}
 
-        {/* Content */}
-        <div className="card">
-          <div
-            className="prose prose-invert max-w-none"
-            style={{
-              whiteSpace: 'pre-wrap',
-              lineHeight: '1.8',
-              fontSize: '1rem'
-            }}
-          >
-            {selectedNote.content}
+        <div ref={pdfRef} className="bg-[var(--color-bg-primary)] p-4 rounded-lg -m-4">
+          {/* Include header for PDF context */}
+          <div className="hidden print:block mb-6 border-b pb-4">
+            <h1 className="text-3xl font-bold mb-2">{selectedNote.title}</h1>
+            <p className="text-sm text-gray-500">Subject: {subject?.name || 'N/A'}</p>
+          </div>
+
+          {/* YouTube Embed */}
+          {selectedNote.youtubeUrl && getYouTubeId(selectedNote.youtubeUrl) && (
+            <div className="card mb-6 p-0 overflow-hidden print:hidden">
+              <iframe
+                className="w-full aspect-video"
+                src={`https://www.youtube.com/embed/${getYouTubeId(selectedNote.youtubeUrl)}`}
+                title="YouTube video player"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              ></iframe>
+            </div>
+          )}
+
+          {/* Content */}
+          <div className="card">
+            <div
+              className="prose prose-invert max-w-none"
+              style={{
+                whiteSpace: 'pre-wrap',
+                lineHeight: '1.8',
+                fontSize: '1rem'
+              }}
+            >
+              {selectedNote.content}
+            </div>
           </div>
         </div>
 
@@ -260,6 +305,20 @@ export default function Notes() {
               onChange={(e) => setCurrentNote({ ...currentNote, title: e.target.value })}
               className="input text-xl font-semibold"
               autoFocus
+            />
+          </div>
+
+          {/* YouTube Link */}
+          <div>
+            <label className="block text-sm font-medium mb-2 flex items-center gap-2">
+              <Youtube size={16} /> YouTube Lecture Link (Optional)
+            </label>
+            <input
+              type="url"
+              placeholder="https://www.youtube.com/watch?v=..."
+              value={currentNote.youtubeUrl || ''}
+              onChange={(e) => setCurrentNote({ ...currentNote, youtubeUrl: e.target.value })}
+              className="input"
             />
           </div>
 
@@ -489,6 +548,9 @@ export default function Notes() {
                   <h3 className="font-semibold line-clamp-2 flex-1">
                     {note.title}
                   </h3>
+                  {note.youtubeUrl && (
+                    <Youtube size={16} className="text-red-500 flex-shrink-0 ml-2" />
+                  )}
                   {note.favorite && (
                     <Star size={16} className="text-yellow-500 fill-yellow-500 flex-shrink-0 ml-2" />
                   )}

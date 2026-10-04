@@ -76,7 +76,7 @@ function App() {
     }
   }, [user, location.pathname, navigate]);
 
-  if (!user && location.pathname === '/login') {
+  if (!user) {
     return (
       <div className="min-h-screen bg-[var(--color-bg-primary)] text-[var(--color-text-primary)]">
         <Routes>

@@ -3,17 +3,7 @@ import { format, addDays } from 'date-fns';
 const generateId = () => `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
 export const sampleData = {
-  user: {
-    id: 'user-1',
-    name: 'Alex',
-    email: 'alex@studyastra.com',
-    avatar: '👨‍🎓',
-    educationLevel: 'Undergraduate',
-    dailyStudyGoal: 240, // minutes
-    preferredStudyHours: { start: '09:00', end: '17:00' },
-    onboardingCompleted: true,
-    createdAt: new Date(Date.now() - 30 * 86400000).toISOString(),
-  },
+  user: null,
 
   subjects: [
     {

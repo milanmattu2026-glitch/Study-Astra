@@ -1,7 +1,7 @@
 import { sampleData } from './sampleData.js';
 
 const STORAGE_KEY = 'studyastra_data';
-const STORAGE_VERSION = '1.0.0';
+const STORAGE_VERSION = '1.0.1';
 
 // Event emitter for reactive updates
 class EventEmitter {

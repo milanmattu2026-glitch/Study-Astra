@@ -57,7 +57,7 @@ export default function Syllabus() {
         return {
           ...ch,
           topics: [...(ch.topics || []), {
-            id: `t-${Date.now()}`,
+            id: `t-${crypto.randomUUID()}`,
             name: newTopicName,
             status: 'not-started'
           }]

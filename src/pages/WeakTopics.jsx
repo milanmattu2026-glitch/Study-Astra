@@ -9,6 +9,7 @@ export default function WeakTopics() {
   const navigate = useNavigate();
   const subjects = useStore('subjects');
   const notes = useStore('notes');
+  const quizzes = useStore('quizzes');
   const { addToast } = useToast();
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [selectedTopicId, setSelectedTopicId] = useState(null);

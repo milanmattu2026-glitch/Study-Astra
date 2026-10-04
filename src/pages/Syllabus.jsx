@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Plus, Edit2, Trash2, ChevronDown, ChevronRight, CheckCircle2, Circle, Clock } from 'lucide-react';
+import { Plus, Trash2, ChevronDown, ChevronRight, CheckCircle2, Circle, Clock, BookOpen } from 'lucide-react';
 import { useStore } from '../hooks/useStore';
 import { store } from '../store';
-import { getSubjectColor } from '../utils/helpers';
 
 export default function Syllabus() {
   const { id } = useParams();
@@ -39,7 +38,7 @@ export default function Syllabus() {
     const updatedSubject = {
       ...selectedSubject,
       chapters: [...(selectedSubject.chapters || []), {
-        id: `ch-${Date.now()}`,
+        id: `ch-${crypto.randomUUID()}`,
         name: newChapter.name,
         topics: []
       }]
@@ -332,7 +331,7 @@ export default function Syllabus() {
         </div>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {subjects.map((subject, idx) => (
+          {subjects.map((subject) => (
             <div
               key={subject.id}
               onClick={() => navigate(`/syllabus/${subject.id}`)}

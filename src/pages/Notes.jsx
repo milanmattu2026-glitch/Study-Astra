@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Plus, Trash2, Edit2, Star, StarOff, Search, Tag, FileText, BookOpen, X, Download, Youtube } from 'lucide-react';
+import { Plus, Trash2, Edit2, Star, StarOff, Search, Tag, FileText, BookOpen, X, Download, Video as Youtube } from 'lucide-react';
 import { useStore } from '../hooks/useStore';
 import { store } from '../store';
 import { formatDate, getRelativeTime, getYouTubeId } from '../utils/helpers';
@@ -311,7 +311,7 @@ export default function Notes() {
           {/* YouTube Link */}
           <div>
             <label className="block text-sm font-medium mb-2 flex items-center gap-2">
-              <Youtube size={16} /> YouTube Lecture Link (Optional)
+              <Video as Youtube size={16} /> YouTube Lecture Link (Optional)
             </label>
             <input
               type="url"
@@ -549,7 +549,7 @@ export default function Notes() {
                     {note.title}
                   </h3>
                   {note.youtubeUrl && (
-                    <Youtube size={16} className="text-red-500 flex-shrink-0 ml-2" />
+                    <Video as Youtube size={16} className="text-red-500 flex-shrink-0 ml-2" />
                   )}
                   {note.favorite && (
                     <Star size={16} className="text-yellow-500 fill-yellow-500 flex-shrink-0 ml-2" />
